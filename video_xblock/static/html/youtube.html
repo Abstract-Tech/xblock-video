@@ -1,9 +1,11 @@
+<div class="video">
 <video
-  id="{{ video_player_id }}"
-  class="video-js vjs-default-skin"
-  controls
-  data-setup='{{ data_setup }}'
+id="{{ video_player_id }}"
+class="video-js vjs-default-skin tc-wrapper"
+controls
+data-setup='{{ data_setup }}'
 >
-  {{ transcripts }}
+{{ transcripts }}
 </video>
+</div>
 <div id="transcript"></div>
