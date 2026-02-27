@@ -71,6 +71,8 @@ class VideoXBlock(
     """
 
     icon_class = "video"
+    # Allow this custom XBlock to render in public/read-only course views.
+    show_in_read_only_mode = True
 
     display_name = String(
         default=_('Video'),
@@ -283,9 +285,9 @@ class VideoXBlock(
         if statici18n_js_url:
             frag.add_javascript(resource_string(statici18n_js_url))
 
-    def student_view(self, _context=None):
+    def _build_student_like_view(self, track_interactions=True):
         """
-        The primary view of the `VideoXBlock`, shown to students when viewing courses.
+        Build a Fragment for student-like rendering.
         """
         player_url = self.runtime.handler_url(self, 'render_player')
         download_transcript_handler_url = self.runtime.handler_url(self, 'download_transcript')
@@ -313,10 +315,23 @@ class VideoXBlock(
         frag = Fragment()
         frag.content = render_template('student_view.html', **context)
         self.add_i18n_resource(frag)
-        frag.add_javascript(resource_string("static/js/student-view/video-xblock.js"))
         frag.add_css(resource_string("static/css/student-view.css"))
-        frag.initialize_js('VideoXBlockStudentViewInit')
+        if track_interactions:
+            frag.add_javascript(resource_string("static/js/student-view/video-xblock.js"))
+            frag.initialize_js('VideoXBlockStudentViewInit')
         return frag
+
+    def student_view(self, _context=None):
+        """
+        The primary view of the `VideoXBlock`, shown to students when viewing courses.
+        """
+        return self._build_student_like_view(track_interactions=True)
+
+    def public_view(self, _context=None):
+        """
+        Render the XBlock for public share pages (anonymous access).
+        """
+        return self._build_student_like_view(track_interactions=False)
 
     def _update_default_transcripts(self, player, transcripts):
         """
